@@ -1,0 +1,13 @@
+<.header>
+  Listing Containers
+</.header>
+
+<.table
+  id="containers"
+  rows={@streams.containers}
+  row_click={fn {_id, container} -> JS.navigate(~p"/containers/#{container}") end}
+>
+  <:col :let={{_id, container}} label="Name"><%= container.name %></:col>
+  <:col :let={{_id, container}} label="Status"><%= container.status %></:col>
+  <:col :let={{_id, container}} label="Ports"><.port_quick_view ports={container.ports} /></:col>
+</.table>

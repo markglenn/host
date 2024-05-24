@@ -1,0 +1,7 @@
+version: '3'
+services:
+  noisy_service:
+    build:
+      context: ./noisy
+    container_name: counter_container
+    tty: true
