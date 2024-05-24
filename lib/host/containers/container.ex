@@ -12,8 +12,10 @@ defmodule Host.Containers.Container do
 
   alias Host.Containers.PortBinding
 
+  @type id_t :: String.t()
+
   @type t :: %__MODULE__{
-          id: String.t(),
+          id: id_t(),
           name: String.t(),
           compose_project: String.t() | nil,
           image: String.t(),

@@ -16,7 +16,14 @@ class TerminalHook extends Hook {
     this.terminal.open(this.el);
 
     fitAddon.fit();
+
+    // Handle reading a writing
     this.handleEvent('terminal-write', ({ content }) => this.handleWrite(content));
+    this.terminal.onData(data => {
+      this.pushEventTo(this.el, 'terminal-read', { data })
+    });
+
+    this.terminal.focus();
   }
 
   handleWrite(text) {

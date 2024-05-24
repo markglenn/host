@@ -1,32 +1,69 @@
 defmodule Host.Docker.TtyClient do
+  use GenServer
+
   alias Mint.HTTP
+  require Logger
 
-  # docker exec -it a7fb1b79f45776965d10f1f395f774c1774c893a362fdecfc5ec110fb7295aea /bin/sh -c eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)
-  def start do
-    {:ok, conn} =
-      HTTP.connect(:http, {:local, "/var/run/docker.sock"}, 0, hostname: "localhost")
-
-    path =
-      "/containers/1a0aefb25f0ff88546bfd5805b07acb917393385efec88a7b51c1501737e54e0/attach/ws?stream=1&stdin=1&stdout=1&stderr=1"
-
-    {:ok, conn, ref} = Mint.WebSocket.upgrade(:ws, conn, path, []) |> IO.inspect()
-
-    http_get_message = receive(do: (message -> message))
-
-    {:ok, conn, [{:status, ^ref, status}, {:headers, ^ref, resp_headers}, {:done, ^ref}]} =
-      Mint.WebSocket.stream(conn, http_get_message)
-
-    {:ok, conn, websocket} = Mint.WebSocket.new(conn, ref, status, resp_headers)
-
-    # send the hello world frame
-    {:ok, websocket, data} =
-      Mint.WebSocket.encode(websocket, {:text, "hello world"})
-
-    {:ok, conn} = Mint.WebSocket.stream_request_body(conn, ref, data)
-
-    # receive the hello world reply frame
-    hello_world_echo_message = receive(do: (message -> message)) |> IO.inspect()
-    {:ok, conn, [{:data, ^ref, data}]} = Mint.WebSocket.stream(conn, hello_world_echo_message)
-    {:ok, websocket, [{:text, "hello world"}]} = Mint.WebSocket.decode(websocket, data)
+  @spec start_link(any(), any()) :: :ignore | {:error, any()} | {:ok, pid()}
+  def start_link(id, docker_socket \\ {:local, "/var/run/docker.sock"}) do
+    GenServer.start_link(__MODULE__, {id, docker_socket, self()})
   end
+
+  def init({id, docker_socket, current}) do
+    {:ok, socket} =
+      :gen_tcp.connect(docker_socket, 0, [:binary, packet: :raw, active: true])
+
+    body = Jason.encode!(%{"Detach" => false, "Tty" => true})
+
+    request =
+      """
+      POST /exec/#{id}/start HTTP/1.1\r
+      Host: localhost\r
+      Content-Type: application/json\r
+      Content-Length: #{byte_size(body)}\r
+      Upgrade: tcp\r
+      Connection: Upgrade\r
+      \r
+      #{body}
+      """
+      |> String.trim()
+
+    :ok = :gen_tcp.send(socket, request)
+
+    {:ok, %{socket: socket, id: id, current: current}}
+  end
+
+  def handle_cast({:send_data, data}, state) do
+    Logger.info("Sending data: #{inspect(data)}")
+    :ok = :gen_tcp.send(state.socket, data)
+
+    {:noreply, state}
+  end
+
+  def handle_cast(:end_stream, state) do
+    {:ok, conn} = HTTP.stream_request_body(state.conn, state.request_ref, :eof)
+    {:noreply, %{state | conn: conn}}
+  end
+
+  def handle_info({:tcp, _port, "HTTP/1.1" <> _rest = body}, state) do
+    Logger.warning("Received HTTP response: #{inspect(body)}")
+    {:noreply, state}
+  end
+
+  def handle_info({:tcp, _port, data}, state) do
+    Logger.info("Received data: #{inspect(data)}")
+
+    send(state.current, {:terminal_write, data})
+
+    {:noreply, state}
+  end
+
+  def handle_info(message, state) do
+    Logger.warning("Received unknown message: #{inspect(message)}")
+    {:noreply, state}
+  end
+
+  def send_data(client, data), do: GenServer.cast(client, {:send_data, data})
+
+  def end_stream(client), do: GenServer.cast(client, :end_stream)
 end
