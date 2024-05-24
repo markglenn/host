@@ -7,7 +7,7 @@ class TerminalHook extends Hook {
 
   mounted() {
     this.terminal = new Terminal({
-      convertEol: true,
+      convertEol: true
     });
 
     const fitAddon = new FitAddon();
