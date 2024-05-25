@@ -6,6 +6,9 @@ defmodule Host.Docker.Client do
   plug Tesla.Middleware.BaseUrl, "http://localhost"
   plug Tesla.Middleware.JSON
 
+  # Start the shell with the user's shell
+  @exec_command ["/bin/sh", "-c", "eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)"]
+
   alias Host.Containers.Container
 
   adapter(Host.Docker.FinchAdapter, name: Host.Finch, unix_socket: "/var/run/docker.sock")
@@ -58,8 +61,7 @@ defmodule Host.Docker.Client do
            AttachStdout: true,
            AttachStderr: true,
            Tty: true,
-           # Cmd: ["/bin/sh -c eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)"]
-           Cmd: ["sh"]
+           Cmd: @exec_command
          }) do
       {:ok, response} ->
         {:ok, response.body["Id"]}

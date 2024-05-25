@@ -19,11 +19,18 @@ class TerminalHook extends Hook {
 
     // Handle reading a writing
     this.handleEvent('terminal-write', ({ content }) => this.handleWrite(content));
-    this.terminal.onData(data => {
-      this.pushEventTo(this.el, 'terminal-read', { data })
-    });
+    this.terminal.onData(data => this.pushEventTo(this.el, 'terminal-read', { data }));
 
     this.terminal.focus();
+
+    // On cmd + k clear the terminal
+    this.terminal.attachCustomKeyEventHandler(e => {
+      if (e.key === 'k' && e.metaKey) {
+        this.terminal?.clear();
+        return false;
+      }
+      return true;
+    });
   }
 
   handleWrite(text) {

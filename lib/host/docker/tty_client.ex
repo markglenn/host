@@ -1,7 +1,6 @@
 defmodule Host.Docker.TtyClient do
   use GenServer
 
-  alias Mint.HTTP
   require Logger
 
   @spec start_link(any(), any()) :: :ignore | {:error, any()} | {:ok, pid()}
@@ -30,7 +29,7 @@ defmodule Host.Docker.TtyClient do
 
     :ok = :gen_tcp.send(socket, request)
 
-    {:ok, %{socket: socket, id: id, current: current}}
+    {:ok, %{socket: socket, id: id, current: current, header_buffer: "", mode: :headers}}
   end
 
   def handle_cast({:send_data, data}, state) do
@@ -40,22 +39,40 @@ defmodule Host.Docker.TtyClient do
     {:noreply, state}
   end
 
-  def handle_cast(:end_stream, state) do
-    {:ok, conn} = HTTP.stream_request_body(state.conn, state.request_ref, :eof)
-    {:noreply, %{state | conn: conn}}
+  def handle_info(
+        {:tcp, socket, content},
+        %{mode: :headers, header_buffer: header_buffer} = state
+      ) do
+    buffer = header_buffer <> content
+
+    case String.split(buffer, "\r\n\r\n", parts: 2) do
+      [headers, body] ->
+        headers
+        |> String.split("\r\n")
+        |> Enum.each(&Logger.info("Received header: #{inspect(&1)}"))
+
+        handle_info({:tcp, socket, body}, %{state | header_buffer: nil, mode: :tcp})
+
+      _ ->
+        # We haven't received the full headers yet
+        {:noreply, %{state | header_buffer: buffer}}
+    end
   end
 
-  def handle_info({:tcp, _port, "HTTP/1.1" <> _rest = body}, state) do
-    Logger.warning("Received HTTP response: #{inspect(body)}")
-    {:noreply, state}
-  end
+  # Empty packet
+  def handle_info({:tcp, _socket, ""}, state), do: {:noreply, state}
 
-  def handle_info({:tcp, _port, data}, state) do
+  def handle_info({:tcp, _socket, data}, state) do
     Logger.info("Received data: #{inspect(data)}")
 
     send(state.current, {:terminal_write, data})
 
     {:noreply, state}
+  end
+
+  def handle_info({:tcp_closed, _port}, state) do
+    Logger.info("TCP connection closed")
+    {:stop, :normal, state}
   end
 
   def handle_info(message, state) do
