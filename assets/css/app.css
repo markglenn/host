@@ -12,3 +12,8 @@
   --persian-green: hsla(170, 31%, 48%, 1);
   --blue-munsell: hsla(187, 73%, 39%, 1);
 }
+
+.logo {
+  font-family: "MuseoModerno", sans-serif;
+  font-optical-sizing: auto;
+}

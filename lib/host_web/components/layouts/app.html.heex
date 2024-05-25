@@ -1,16 +1,21 @@
 <header class="px-4 sm:px-6 lg:px-8 ">
-  <div class="flex items-center justify-between py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <.link navigate={~p"/"}>
-        <img src={~p"/images/host.png"} class="inline h-9" />
-      </.link>
-    </div>
+  <div class="flex items-center justify-between border-b py-3 text-sm">
+    <.link
+      navigate={~p"/containers"}
+      class="flex items-center gap-0 logo text-2xl text-zinc-700 border border-zinc-700"
+    >
+      <div class="font-extralight text-zinc-100 text-2xl border-r bg-zinc-700 h-full py-1 px-3">
+        H
+      </div>
+      <div class="px-4">HOST</div>
+    </.link>
+
     <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900 uppercase">
-      <.link navigate={~p"/containers"}>
+      <.link navigate={~p"/containers"} class="hover:text-zinc-500">
         Docker
       </.link>
 
-      <.link navigate={~p"/containers"}>
+      <.link navigate={~p"/containers"} class="hover:text-zinc-500">
         VMs
       </.link>
     </div>
