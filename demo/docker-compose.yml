@@ -5,3 +5,9 @@ services:
       context: ./noisy
     container_name: counter_container
     tty: true
+
+  neovim_service:
+    build:
+      context: ./neovim
+    container_name: neovim_container
+    tty: true

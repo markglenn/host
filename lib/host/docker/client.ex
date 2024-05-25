@@ -38,20 +38,23 @@ defmodule Host.Docker.Client do
     end
   end
 
-  @spec watch_logs(Container.id_t()) :: pid()
+  @spec watch_logs(Container.id_t()) :: {:ok, pid()}
   def watch_logs(container_id) do
     current = self()
 
-    spawn_link(fn ->
-      {:ok, env} =
-        get("/containers/#{container_id}/logs?stdout=true&follow=true",
-          opts: [adapter: [response: :stream]]
-        )
+    pid =
+      spawn_link(fn ->
+        {:ok, env} =
+          get("/containers/#{container_id}/logs?stdout=true&follow=true",
+            opts: [adapter: [response: :stream]]
+          )
 
-      env.body
-      |> Stream.each(&send(current, {:terminal_write, &1}))
-      |> Stream.run()
-    end)
+        env.body
+        |> Stream.each(&send(current, {:terminal_write, &1}))
+        |> Stream.run()
+      end)
+
+    {:ok, pid}
   end
 
   @spec create_tty_instance(Container.id_t()) :: {:error, any()} | {:ok, Container.id_t()}

@@ -63,8 +63,6 @@ defmodule Host.Docker.TtyClient do
   def handle_info({:tcp, _socket, ""}, state), do: {:noreply, state}
 
   def handle_info({:tcp, _socket, data}, state) do
-    Logger.info("Received data: #{inspect(data)}")
-
     send(state.current, {:terminal_write, data})
 
     {:noreply, state}
@@ -72,6 +70,7 @@ defmodule Host.Docker.TtyClient do
 
   def handle_info({:tcp_closed, _port}, state) do
     Logger.info("TCP connection closed")
+    send(state.current, {:terminal_closed})
     {:stop, :normal, state}
   end
 

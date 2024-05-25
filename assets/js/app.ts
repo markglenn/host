@@ -18,6 +18,7 @@
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
 import TerminalHook from "./hooks/terminal"
+import PopoutHook from "./hooks/popout"
 
 // Establish Phoenix Socket and LiveView configuration.
 import { Socket } from "phoenix"
@@ -28,7 +29,10 @@ let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute(
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },
-  hooks: { TerminalHook }
+  hooks: {
+    TerminalHook,
+    PopoutHook
+  }
 })
 
 // Show progress bar on live navigation and form submits
@@ -44,3 +48,5 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window['liveSocket'] = liveSocket
+
+window.addEventListener("phx:close-window", _ => window.close())

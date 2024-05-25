@@ -1,6 +1,32 @@
 <.header>
   Container <%= @container.name %>
-  <:subtitle><%= @container.status %></:subtitle>
+  <:subtitle>
+    <%= String.capitalize(@container.status) %>
+
+    <span class="font-semibold inline-flex justify-between gap-2 ml-2">
+      <a
+        href={~p"/containers/#{@container.id}/logs"}
+        phx-hook="PopoutHook"
+        id="view-logs-link"
+        data-width="800"
+        data-height="600"
+        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80 inline-block"
+      >
+        View logs
+      </a>
+
+      <a
+        href={~p"/containers/#{@container.id}/terminal"}
+        phx-hook="PopoutHook"
+        id="view-terminal-link"
+        data-width="800"
+        data-height="600"
+        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80 inline-block"
+      >
+        Open Terminal
+      </a>
+    </span>
+  </:subtitle>
 </.header>
 
 <.list>
@@ -9,10 +35,4 @@
   <:item title="Ports"><.port_quick_view ports={@container.ports} /></:item>
 </.list>
 
-<div class="p-4 bg-black rounded-lg">
-  <div id="terminal" phx-hook="TerminalHook"></div>
-</div>
-
 <.back navigate={~p"/containers"}>Back to containers</.back>
-
-<pre><%= inspect(@container, pretty: true) %></pre>

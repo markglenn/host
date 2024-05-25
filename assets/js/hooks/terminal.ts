@@ -31,14 +31,20 @@ class TerminalHook extends Hook {
       }
       return true;
     });
-  }
 
-  handleWrite(text) {
-    this.terminal?.write(text);
+    const observer = new ResizeObserver(() => {
+      fitAddon.fit();
+    });
+
+    observer.observe(this.el);
   }
 
   destroyed() {
     this.terminal?.dispose();
+  }
+
+  handleWrite(text: string) {
+    this.terminal?.write(text);
   }
 }
 

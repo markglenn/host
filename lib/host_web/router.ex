@@ -24,7 +24,8 @@ defmodule HostWeb.Router do
     live "/containers/:id/edit", ContainerLive.Index, :edit
 
     live "/containers/:id", ContainerLive.Show, :show
-    live "/containers/:id/show/edit", ContainerLive.Show, :edit
+    live "/containers/:id/terminal", ContainerLive.TerminalWindow, :show
+    live "/containers/:id/logs", ContainerLive.LogsWindow, :show
   end
 
   # Other scopes may use custom stacks.
