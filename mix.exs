@@ -59,8 +59,7 @@ defmodule Host.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.2"},
       {:tesla, "~> 1.9"},
-      {:hackney, "~> 1.20"},
-      {:rustler, "~> 0.32.1", runtime: false}
+      {:hackney, "~> 1.20"}
     ]
   end
 
