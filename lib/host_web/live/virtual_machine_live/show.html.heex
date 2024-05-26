@@ -1,0 +1,31 @@
+<.header>
+  Virtual machine <%= @virtual_machine.id %>
+  <:subtitle>This is a virtual_machine record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/vms/#{@virtual_machine}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit virtual_machine</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @virtual_machine.name %></:item>
+</.list>
+
+<.back navigate={~p"/vms"}>Back to virtual_machines</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="virtual_machine-modal"
+  show
+  on_cancel={JS.patch(~p"/vms/#{@virtual_machine}")}
+>
+  <.live_component
+    module={HostWeb.VirtualMachineLive.FormComponent}
+    id={@virtual_machine.id}
+    title={@page_title}
+    action={@live_action}
+    virtual_machine={@virtual_machine}
+    patch={~p"/vms/#{@virtual_machine}"}
+  />
+</.modal>

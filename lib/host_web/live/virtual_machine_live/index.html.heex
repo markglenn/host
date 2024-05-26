@@ -1,0 +1,46 @@
+<.header>
+  Listing Virtual machines
+  <:actions>
+    <.link patch={~p"/vms/new"}>
+      <.button>New Virtual machine</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="virtual_machines"
+  rows={@streams.virtual_machines}
+  row_click={fn {_id, virtual_machine} -> JS.navigate(~p"/vms/#{virtual_machine}") end}
+>
+  <:col :let={{_id, virtual_machine}} label="Name"><%= virtual_machine.name %></:col>
+  <:action :let={{_id, virtual_machine}}>
+    <div class="sr-only">
+      <.link navigate={~p"/vms/#{virtual_machine}"}>Show</.link>
+    </div>
+    <.link patch={~p"/vms/#{virtual_machine}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, virtual_machine}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: virtual_machine.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="virtual_machine-modal"
+  show
+  on_cancel={JS.patch(~p"/vms")}
+>
+  <.live_component
+    module={HostWeb.VirtualMachineLive.FormComponent}
+    id={@virtual_machine.id || :new}
+    title={@page_title}
+    action={@live_action}
+    virtual_machine={@virtual_machine}
+    patch={~p"/vms"}
+  />
+</.modal>
