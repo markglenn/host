@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "*.html.erb": "erb",
+    "*.heex": "phoenix-heex",
+    "libvirt.h": "c",
+    "erl_nif.h": "c"
+  }
+}
