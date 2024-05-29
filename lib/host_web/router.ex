@@ -8,6 +8,7 @@ defmodule HostWeb.Router do
     plug :put_root_layout, html: {HostWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :put_user_token
   end
 
   pipeline :api do
@@ -54,6 +55,15 @@ defmodule HostWeb.Router do
 
       live_dashboard "/dashboard", metrics: HostWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
+  end
+
+  defp put_user_token(conn, _) do
+    if current_user = conn.assigns[:current_user] do
+      token = Phoenix.Token.sign(conn, "user socket", current_user.id)
+      assign(conn, :user_token, token)
+    else
+      conn
     end
   end
 end

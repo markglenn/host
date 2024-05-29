@@ -1,11 +1,24 @@
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from "@xterm/addon-fit";
 import { Hook, makeHook } from 'phoenix_typed_hook';
+import { Channel, Socket } from 'phoenix';
 
 class TerminalHook extends Hook {
   terminal?: Terminal;
+  channel?: Channel;
 
   mounted() {
+    const socket = window['userSocket'] as Socket;
+
+    // Connect to the terminal channel
+    this.channel = socket.channel(`terminal:${this.el.dataset.type}:${this.el.dataset.topic}`, {
+      container_id: this.el.dataset.containerId
+    });
+
+    this.channel.join()
+      .receive("ok", resp => { console.log("Joined successfully", resp) })
+      .receive("error", resp => { console.log("Unable to join", resp) });
+
     this.terminal = new Terminal({
       convertEol: true
     });
@@ -18,8 +31,9 @@ class TerminalHook extends Hook {
     fitAddon.fit();
 
     // Handle reading a writing
-    this.handleEvent('terminal-write', ({ content }) => this.handleWrite(content));
-    this.terminal.onData(data => this.pushEventTo(this.el, 'terminal-read', { data }));
+    this.terminal.onData(data => this.channel?.push("write", { data }));
+    this.channel.on("read", ({ content }) => this.terminal?.write(content));
+    this.channel.on("closed", () => window.close());
 
     this.terminal.focus();
 
@@ -41,10 +55,6 @@ class TerminalHook extends Hook {
 
   destroyed() {
     this.terminal?.dispose();
-  }
-
-  handleWrite(text: string) {
-    this.terminal?.write(text);
   }
 }
 

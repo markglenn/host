@@ -24,6 +24,7 @@ import PopoutHook from "./hooks/popout"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import UserSocket from "./user_socket";
 
 let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
@@ -47,6 +48,7 @@ liveSocket.connect()
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
-window['liveSocket'] = liveSocket
+window['liveSocket'] = liveSocket;
+window['userSocket'] = UserSocket;
 
 window.addEventListener("phx:close-window", _ => window.close())

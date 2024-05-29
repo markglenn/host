@@ -1,16 +1,19 @@
 defmodule Host.Docker.TtyClient do
   use GenServer
+  alias Phoenix.PubSub
 
   require Logger
 
-  @spec start_link(any(), any()) :: :ignore | {:error, any()} | {:ok, pid()}
-  def start_link(id, docker_socket \\ {:local, "/var/run/docker.sock"}) do
-    GenServer.start_link(__MODULE__, {id, docker_socket, self()})
+  @spec start_link(any(), String.t(), any()) :: :ignore | {:error, any()} | {:ok, pid()}
+  def start_link(id, topic, docker_socket \\ {:local, "/var/run/docker.sock"}) do
+    GenServer.start_link(__MODULE__, {id, topic, docker_socket})
   end
 
-  def init({id, docker_socket, current}) do
+  def init({id, topic, docker_socket}) do
     {:ok, socket} =
       :gen_tcp.connect(docker_socket, 0, [:binary, packet: :raw, active: true])
+
+    Logger.info("Connected to docker socket for ID #{id}")
 
     body = Jason.encode!(%{"Detach" => false, "Tty" => true})
 
@@ -29,14 +32,9 @@ defmodule Host.Docker.TtyClient do
 
     :ok = :gen_tcp.send(socket, request)
 
-    {:ok, %{socket: socket, id: id, current: current, header_buffer: "", mode: :headers}}
-  end
+    PubSub.subscribe(Host.PubSub, "terminal:#{topic}:write")
 
-  def handle_cast({:send_data, data}, state) do
-    Logger.info("Sending data: #{inspect(data)}")
-    :ok = :gen_tcp.send(state.socket, data)
-
-    {:noreply, state}
+    {:ok, %{socket: socket, id: id, topic: topic, header_buffer: "", mode: :headers}}
   end
 
   def handle_info(
@@ -63,23 +61,27 @@ defmodule Host.Docker.TtyClient do
   def handle_info({:tcp, _socket, ""}, state), do: {:noreply, state}
 
   def handle_info({:tcp, _socket, data}, state) do
-    send(state.current, {:terminal_write, data})
+    PubSub.broadcast!(Host.PubSub, "terminal:#{state.topic}:read", {:terminal_read, data})
 
     {:noreply, state}
   end
 
   def handle_info({:tcp_closed, _port}, state) do
     Logger.info("TCP connection closed")
-    send(state.current, {:terminal_closed})
+    PubSub.broadcast!(Host.PubSub, "terminal:#{state.topic}:closed", :terminal_closed)
     {:stop, :normal, state}
+  end
+
+  def handle_info({:terminal_write, data}, state) do
+    :ok = :gen_tcp.send(state.socket, data)
+
+    {:noreply, state}
   end
 
   def handle_info(message, state) do
     Logger.warning("Received unknown message: #{inspect(message)}")
     {:noreply, state}
   end
-
-  def send_data(client, data), do: GenServer.cast(client, {:send_data, data})
 
   def end_stream(client), do: GenServer.cast(client, :end_stream)
 end

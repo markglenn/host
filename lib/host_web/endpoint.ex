@@ -50,4 +50,8 @@ defmodule HostWeb.Endpoint do
   plug Plug.Head
   plug Plug.Session, @session_options
   plug HostWeb.Router
+
+  socket "/socket", HostWeb.UserSocket,
+    websocket: true,
+    longpoll: false
 end

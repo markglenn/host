@@ -4,7 +4,6 @@ defmodule HostWeb.ContainerLive.LogsWindow do
 
   alias Host.Containers
   alias Host.Containers.Container
-  alias HostWeb.ContainerLive.TerminalEmulator
 
   @impl true
   def mount(_params, _session, socket) do
@@ -18,7 +17,8 @@ defmodule HostWeb.ContainerLive.LogsWindow do
     {:noreply,
      socket
      |> assign(:page_title, page_title(container))
-     |> assign(:container, container)}
+     |> assign(:container, container)
+     |> assign(:uuid, Ecto.UUID.generate())}
   end
 
   defp page_title(%Container{name: name}), do: "#{name} Terminal"
@@ -26,12 +26,16 @@ defmodule HostWeb.ContainerLive.LogsWindow do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="h-screen p-4 box-border flex">
-      <%= live_render(@socket, TerminalEmulator,
-        id: "terminal",
-        session: %{"id" => @container.id, "terminal_type" => :log},
-        container: {:div, class: "w-full bg-black flex p-4 rounded-md"}
-      ) %>
+    <div class="h-screen p-4 box-border flex bg-black">
+      <div
+        id="terminal-emulator-container"
+        data-container-id={@container.id}
+        data-topic={@uuid}
+        data-type="logs"
+        phx-hook="TerminalHook"
+        class="bg-black flex w-full"
+      >
+      </div>
     </div>
     """
   end

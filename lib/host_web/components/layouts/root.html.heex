@@ -8,6 +8,9 @@
       <%= assigns[:page_title] || "Host" %>
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script>
+      window.userToken = "<%= assigns[:user_token] %>";
+    </script>
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
