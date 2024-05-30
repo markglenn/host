@@ -1,4 +1,4 @@
-defmodule HostWeb.ContainerLive.LogsWindow do
+defmodule HostWeb.ContainerLive.Logs do
   require Logger
   use HostWeb, :live_view
 

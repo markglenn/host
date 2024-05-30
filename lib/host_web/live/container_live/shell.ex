@@ -1,4 +1,4 @@
-defmodule HostWeb.ContainerLive.TerminalWindow do
+defmodule HostWeb.ContainerLive.Shell do
   require Logger
   use HostWeb, :live_view
 

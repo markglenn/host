@@ -6,8 +6,6 @@ defmodule Host.Docker.Client do
   plug Tesla.Middleware.BaseUrl, "http://localhost"
   plug Tesla.Middleware.JSON
 
-  alias Phoenix.PubSub
-
   # Start the shell with the user's shell
   @exec_command ["/bin/sh", "-c", "eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)"]
 
@@ -40,8 +38,10 @@ defmodule Host.Docker.Client do
     end
   end
 
-  @spec watch_logs(Container.id_t(), String.t()) :: {:ok, pid()}
-  def watch_logs(container_id, topic) do
+  @spec watch_logs(Container.id_t()) :: {:ok, pid()}
+  def watch_logs(container_id) do
+    current = self()
+
     pid =
       spawn_link(fn ->
         {:ok, env} =
@@ -50,9 +50,7 @@ defmodule Host.Docker.Client do
           )
 
         env.body
-        |> Stream.each(
-          &PubSub.broadcast!(Host.PubSub, "terminal:#{topic}:read", {:terminal_read, &1})
-        )
+        |> Stream.each(&send(current, {:terminal_read, &1}))
         |> Stream.run()
       end)
 

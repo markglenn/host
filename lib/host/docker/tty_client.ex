@@ -1,15 +1,22 @@
 defmodule Host.Docker.TtyClient do
   use GenServer
-  alias Phoenix.PubSub
 
   require Logger
 
-  @spec start_link(any(), String.t(), any()) :: :ignore | {:error, any()} | {:ok, pid()}
-  def start_link(id, topic, docker_socket \\ {:local, "/var/run/docker.sock"}) do
-    GenServer.start_link(__MODULE__, {id, topic, docker_socket})
+  @type state_t :: %{
+          socket: Socket,
+          id: String.t(),
+          header_buffer: String.t() | nil,
+          mode: :headers | :tcp,
+          listening_pid: pid()
+        }
+
+  @spec start_link(any(), any()) :: :ignore | {:error, any()} | {:ok, pid()}
+  def start_link(id, docker_socket \\ {:local, "/var/run/docker.sock"}) do
+    GenServer.start_link(__MODULE__, {id, docker_socket, self()})
   end
 
-  def init({id, topic, docker_socket}) do
+  def init({id, docker_socket, listening_pid}) do
     {:ok, socket} =
       :gen_tcp.connect(docker_socket, 0, [:binary, packet: :raw, active: true])
 
@@ -32,9 +39,8 @@ defmodule Host.Docker.TtyClient do
 
     :ok = :gen_tcp.send(socket, request)
 
-    PubSub.subscribe(Host.PubSub, "terminal:#{topic}:write")
-
-    {:ok, %{socket: socket, id: id, topic: topic, header_buffer: "", mode: :headers}}
+    {:ok,
+     %{socket: socket, id: id, header_buffer: "", mode: :headers, listening_pid: listening_pid}}
   end
 
   def handle_info(
@@ -61,21 +67,17 @@ defmodule Host.Docker.TtyClient do
   def handle_info({:tcp, _socket, ""}, state), do: {:noreply, state}
 
   def handle_info({:tcp, _socket, data}, state) do
-    PubSub.broadcast!(Host.PubSub, "terminal:#{state.topic}:read", {:terminal_read, data})
+    # TODO: Send the read data back to the listening client
+    send(state.listening_pid, {:terminal_read, data})
 
     {:noreply, state}
   end
 
   def handle_info({:tcp_closed, _port}, state) do
     Logger.info("TCP connection closed")
-    PubSub.broadcast!(Host.PubSub, "terminal:#{state.topic}:closed", :terminal_closed)
+    send(state.listening_pid, :terminal_closed)
+
     {:stop, :normal, state}
-  end
-
-  def handle_info({:terminal_write, data}, state) do
-    :ok = :gen_tcp.send(state.socket, data)
-
-    {:noreply, state}
   end
 
   def handle_info(message, state) do
@@ -83,5 +85,13 @@ defmodule Host.Docker.TtyClient do
     {:noreply, state}
   end
 
-  def end_stream(client), do: GenServer.cast(client, :end_stream)
+  def handle_call({:terminal_write, data}, _from, state) do
+    case :gen_tcp.send(state.socket, data) do
+      :ok -> {:reply, :ok, state}
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def write(client, data), do: GenServer.call(client, {:terminal_write, data})
+  # def end_stream(client), do: GenServer.cast(client, :end_stream)
 end

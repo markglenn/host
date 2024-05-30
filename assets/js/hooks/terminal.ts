@@ -30,8 +30,10 @@ class TerminalHook extends Hook {
 
     fitAddon.fit();
 
-    // Handle reading a writing
-    this.terminal.onData(data => this.channel?.push("write", { data }));
+    if (this.el.dataset.type === "shell") {
+      this.terminal.onData(data => this.channel?.push("write", { data }));
+    }
+
     this.channel.on("read", ({ content }) => this.terminal?.write(content));
     this.channel.on("closed", () => window.close());
 
@@ -46,10 +48,7 @@ class TerminalHook extends Hook {
       return true;
     });
 
-    const observer = new ResizeObserver(() => {
-      fitAddon.fit();
-    });
-
+    const observer = new ResizeObserver(() => fitAddon.fit());
     observer.observe(this.el);
   }
 

@@ -25,8 +25,8 @@ defmodule HostWeb.Router do
     live "/containers/:id/edit", ContainerLive.Index, :edit
 
     live "/containers/:id", ContainerLive.Show, :show
-    live "/containers/:id/terminal", ContainerLive.TerminalWindow, :show
-    live "/containers/:id/logs", ContainerLive.LogsWindow, :show
+    live "/containers/:id/shell", ContainerLive.Shell, :show
+    live "/containers/:id/logs", ContainerLive.Logs, :show
 
     live "/vms", VirtualMachineLive.Index, :index
     live "/vms/new", VirtualMachineLive.Index, :new
