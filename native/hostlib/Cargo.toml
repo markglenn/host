@@ -1,0 +1,14 @@
+[package]
+name = "hostlib"
+version = "0.1.0"
+authors = []
+edition = "2021"
+
+[lib]
+name = "hostlib"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = "1.0.86"
+rustler = "0.33.0"

@@ -21,9 +21,6 @@ defmodule HostWeb.Router do
     get "/", PageController, :home
 
     live "/containers", ContainerLive.Index, :index
-    live "/containers/new", ContainerLive.Index, :new
-    live "/containers/:id/edit", ContainerLive.Index, :edit
-
     live "/containers/:id", ContainerLive.Show, :show
     live "/containers/:id/shell", ContainerLive.Shell, :show
     live "/containers/:id/logs", ContainerLive.Logs, :show
@@ -31,9 +28,14 @@ defmodule HostWeb.Router do
     live "/vms", VirtualMachineLive.Index, :index
     live "/vms/new", VirtualMachineLive.Index, :new
     live "/vms/:id/edit", VirtualMachineLive.Index, :edit
-
     live "/vms/:id", VirtualMachineLive.Show, :show
     live "/vms/:id/show/edit", VirtualMachineLive.Show, :edit
+
+    live "/files", FileLive.Index, :index
+    live "/files/new", FileLive.Index, :new
+    live "/files/:id/edit", FileLive.Index, :edit
+    live "/files/:id", FileLive.Show, :show
+    live "/files/:id/show/edit", FileLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.

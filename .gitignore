@@ -35,3 +35,8 @@ host-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Artifacts from rustler
+/target
+/priv/native
+
+/tasks.txt

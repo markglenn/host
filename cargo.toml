@@ -1,0 +1,3 @@
+[workspace]
+members = ["native/hostlib"]
+resolver = "2"

@@ -1,0 +1,16 @@
+<.header>
+  Listing Files
+</.header>
+
+<.table
+  id="files"
+  rows={@streams.files}
+  row_click={fn {_id, file} -> JS.navigate(~p"/files/#{file}") end}
+>
+  <:col :let={{_id, file}} label="Name"><%= file.name %></:col>
+  <:action :let={{_id, file}}>
+    <div class="sr-only">
+      <.link navigate={~p"/files/#{file}"}>Show</.link>
+    </div>
+  </:action>
+</.table>
