@@ -4,10 +4,38 @@
 
 <.table
   id="containers"
-  rows={@streams.containers}
-  row_click={fn {_id, container} -> JS.navigate(~p"/containers/#{container}") end}
+  rows={@containers}
+  row_click={fn container -> JS.navigate(~p"/containers/#{container}") end}
 >
-  <:col :let={{_id, container}} label="Name"><%= container.name %></:col>
-  <:col :let={{_id, container}} label="Status"><%= container.status %></:col>
-  <:col :let={{_id, container}} label="Ports"><.port_quick_view ports={container.ports} /></:col>
+  <:col :let={container} label="Name">
+    <div>
+      <%= container.name %>
+      <div class="pt-1 text-xs"><.container_status status={container.status} /></div>
+    </div>
+  </:col>
+  <:col :let={container} label="Ports"><.container_ports ports={container.ports} /></:col>
+
+  <:action :let={container}>
+    <%= if container.status == "exited" do %>
+      <.link phx-click={JS.push("start", value: %{id: container.id})}>Start</.link>
+    <% else %>
+      <span class="text-sm font-semibold leading-6 text-zinc-300">Start</span>
+    <% end %>
+  </:action>
+
+  <:action :let={container}>
+    <%= if container.status == "running" do %>
+      <.link phx-click={JS.push("stop", value: %{id: container.id})}>Stop</.link>
+    <% else %>
+      <span class="text-sm font-semibold leading-6 text-zinc-300">Stop</span>
+    <% end %>
+  </:action>
+
+  <:action :let={container}>
+    <%= if container.status == "running" do %>
+      <.link phx-click={JS.push("restart", value: %{id: container.id})}>Restart</.link>
+    <% else %>
+      <span class="text-sm font-semibold leading-6 text-zinc-300">Restart</span>
+    <% end %>
+  </:action>
 </.table>

@@ -38,6 +38,39 @@ defmodule Host.Docker.Client do
     end
   end
 
+  @spec restart_container(Container.id_t()) :: {:error, any()} | {:ok, any()}
+  def restart_container(id) do
+    case post("/containers/#{id}/restart", %{}) do
+      {:ok, response} ->
+        {:ok, response.body}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def stop_container(id, opts \\ []) do
+    wait = Keyword.get(opts, :wait, 10)
+
+    case post("/containers/#{id}/stop?t=#{wait}", %{}) do
+      {:ok, response} ->
+        {:ok, response.body}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def start_container(id) do
+    case post("/containers/#{id}/start", %{}) do
+      {:ok, response} ->
+        {:ok, response.body}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
   @spec watch_logs(Container.id_t()) :: {:ok, pid()}
   def watch_logs(container_id) do
     current = self()

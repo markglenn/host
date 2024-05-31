@@ -14,6 +14,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      animation: {
+        'spin-slow': 'spin 3s linear infinite',
+      },
       colors: {
         brand: "#FD4F00",
         'rich-black': { DEFAULT: '#04151f', 100: '#010406', 200: '#02090d', 300: '#020d13', 400: '#031119', 500: '#04151f', 600: '#0f4f74', 700: '#1a88c7', 800: '#57b4e9', 900: '#abd9f4' },
