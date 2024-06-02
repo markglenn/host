@@ -16,8 +16,6 @@ defmodule Host.Docker.EventWatcher do
   end
 
   @impl true
-  def init(%{socket: nil}), do: {:ok, %{task_pid: nil}}
-
   def init(%{socket: socket}) do
     {:ok, pid} = do_start_watcher(socket, nil)
 
@@ -33,34 +31,40 @@ defmodule Host.Docker.EventWatcher do
 
   def watch(socket \\ "/var/run/docker.sock"), do: GenServer.call(__MODULE__, {:watch, socket})
 
+  @spec do_start_watcher(String.t() | nil, pid() | nil) :: {:ok, pid() | nil}
   defp do_start_watcher(socket, current_task) do
     if current_task do
       Logger.info("Stopping existing event watcher")
       Process.exit(current_task, :kill)
     end
 
-    {:ok, pid} =
-      Task.start_link(fn ->
+    if is_nil(socket) do
+      Logger.info("No socket provided for Docker event watcher")
+      {:ok, nil}
+    else
+      Logger.info("Starting event watcher")
+
+      Task.start(fn ->
         client =
           Tesla.client(
             [Tesla.Middleware.JSON],
             {Host.Docker.FinchAdapter, name: Host.Finch, unix_socket: socket}
           )
 
-        {:ok, env} =
-          Tesla.get(client, "http://localhost/events", opts: [adapter: [response: :stream]])
+        case Tesla.get(client, "http://localhost/events", opts: [adapter: [response: :stream]]) do
+          {:ok, env} ->
+            env.body
+            |> Stream.each(&container_event/1)
+            |> Stream.run()
 
-        env.body
-        |> Stream.each(&publish_container_event/1)
-        |> Stream.run()
+          {:error, reason} ->
+            Logger.error("Failed to start event watcher: #{inspect(reason)}")
+        end
       end)
-
-    Logger.info("Started event watcher")
-
-    {:ok, pid}
+    end
   end
 
-  defp publish_container_event(%{"Action" => "stop", "id" => container_id}) do
+  defp container_event(%{"Action" => "stop", "id" => container_id}) do
     Logger.info("Container stopped: #{container_id}")
 
     PubSub.broadcast(
@@ -70,7 +74,17 @@ defmodule Host.Docker.EventWatcher do
     )
   end
 
-  defp publish_container_event(%{"Action" => "start", "id" => container_id} = e) do
+  defp container_event(%{"Action" => "kill", "id" => container_id}) do
+    Logger.info("Container stopping: #{container_id}")
+
+    PubSub.broadcast(
+      Host.PubSub,
+      "containers:status",
+      {:container_status_update, {container_id, :stopping}}
+    )
+  end
+
+  defp container_event(%{"Action" => "start", "id" => container_id} = e) do
     Logger.info("Container started: #{container_id}: #{inspect(e)}")
 
     PubSub.broadcast(
@@ -80,7 +94,17 @@ defmodule Host.Docker.EventWatcher do
     )
   end
 
-  defp publish_container_event(e) do
+  defp container_event(%{"Action" => "die", "id" => container_id}) do
+    Logger.info("Container stopped: #{container_id}")
+
+    PubSub.broadcast(
+      Host.PubSub,
+      "containers:status",
+      {:container_status_update, {container_id, :exited}}
+    )
+  end
+
+  defp container_event(e) do
     Logger.info("Ignored event: #{inspect(e)}")
   end
 end

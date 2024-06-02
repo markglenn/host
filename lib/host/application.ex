@@ -16,6 +16,7 @@ defmodule Host.Application do
       {Finch, name: Host.Finch},
       # Start a worker by calling: Host.Worker.start_link(arg)
       # {Host.Worker, arg},
+      {Host.Docker.EventWatcher, "/var/run/docker.sock"},
       # Start to serve requests, typically the last entry
       HostWeb.Endpoint
     ]

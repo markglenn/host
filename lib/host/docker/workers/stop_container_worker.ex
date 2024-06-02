@@ -6,10 +6,12 @@ defmodule Host.Docker.Workers.StopContainerWorker do
 
   require Logger
 
+  @spec start_link(String.t()) :: {:ok, pid()}
   def start_link(container_id) do
     Task.start_link(__MODULE__, :run, [container_id])
   end
 
+  @spec run(String.t()) :: {:ok, any()} | {:error, any()}
   def run(container_id) do
     Logger.info("Stopping container: #{container_id}")
 
@@ -19,24 +21,6 @@ defmodule Host.Docker.Workers.StopContainerWorker do
       {:container_status_update, {container_id, :stopping}}
     )
 
-    case Client.stop_container(container_id, wait: 10) do
-      {:ok, _} ->
-        Logger.info("Container stopped: #{container_id}")
-
-        PubSub.broadcast(
-          Host.PubSub,
-          "containers:status",
-          {:container_status_update, {container_id, :exited}}
-        )
-
-      {:error, _} ->
-        Logger.error("Failed to restart container: #{container_id}")
-
-        PubSub.broadcast(
-          Host.PubSub,
-          "containers:status",
-          {:container_status_update, {container_id, :running}}
-        )
-    end
+    Client.stop_container(container_id, wait: 10)
   end
 end

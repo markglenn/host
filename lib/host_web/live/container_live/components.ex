@@ -20,13 +20,18 @@ defmodule HostWeb.ContainerLive.Components do
 
   def container_status(assigns) do
     ~H"""
-    <.container_status_icon status={@status} /> <%= String.capitalize(@status) %>
+    <div class="flex items-center">
+      <div class="w-8 h-6 flex-shrink-0">
+        <.container_status_icon status={@status} />
+      </div>
+      <%= String.capitalize(@status) %>
+    </div>
     """
   end
 
   defp container_status_icon(%{status: "running"} = assigns),
     do: ~H"""
-    <.icon name="hero-play" class="text-green-500 w-5 inline-block" />
+    <.icon name="hero-play" class="text-green-500" />
     """
 
   defp container_status_icon(%{status: status} = assigns)
