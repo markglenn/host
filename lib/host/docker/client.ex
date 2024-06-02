@@ -27,9 +27,9 @@ defmodule Host.Docker.Client do
     end
   end
 
-  @spec get_container(Container.id_t()) :: {:error, any()} | {:ok, map()}
-  def get_container(id) do
-    case get("/containers/#{id}/json") do
+  @spec get_container(Container.id()) :: {:error, any()} | {:ok, map()}
+  def get_container(container_id) do
+    case get("/containers/#{container_id}/json") do
       {:ok, response} ->
         {:ok, response.body}
 
@@ -38,28 +38,66 @@ defmodule Host.Docker.Client do
     end
   end
 
-  @spec watch_logs(Container.id_t()) :: {:ok, pid()}
+  @spec restart_container(Container.id()) :: {:error, any()} | {:ok, any()}
+  def restart_container(container_id) do
+    case post("/containers/#{container_id}/restart", %{}) do
+      {:ok, response} ->
+        {:ok, response.body}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def stop_container(container_id, opts \\ []) do
+    wait = Keyword.get(opts, :wait, 10)
+
+    url = Tesla.build_url("/containers/#{container_id}/stop", t: wait)
+
+    case post(url, %{}) do
+      {:ok, response} ->
+        {:ok, response.body}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def start_container(container_id) do
+    case post("/containers/#{container_id}/start", %{}) do
+      {:ok, response} ->
+        {:ok, response.body}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  @spec watch_logs(Container.id()) :: {:ok, pid()}
   def watch_logs(container_id) do
     current = self()
 
     pid =
       spawn_link(fn ->
-        {:ok, env} =
-          get("/containers/#{container_id}/logs?stdout=true&follow=true",
-            opts: [adapter: [response: :stream]]
-          )
+        url = Tesla.build_url("/containers/#{container_id}/logs", stdout: "true", follow: "true")
 
-        env.body
-        |> Stream.each(&send(current, {:terminal_read, &1}))
-        |> Stream.run()
+        case get(url, opts: [adapter: [response: :stream]]) do
+          {:ok, env} ->
+            env.body
+            |> Stream.each(&send(current, {:terminal_read, &1}))
+            |> Stream.run()
+
+          _ ->
+            Logger.error("Failed to get logs for container: #{container_id}")
+        end
       end)
 
     {:ok, pid}
   end
 
-  @spec create_tty_instance(Container.id_t()) :: {:error, any()} | {:ok, Container.id_t()}
-  def create_tty_instance(id) do
-    case post("/containers/#{id}/exec", %{
+  @spec create_tty_instance(Container.id()) :: {:error, any()} | {:ok, Container.id()}
+  def create_tty_instance(container_id) do
+    case post("/containers/#{container_id}/exec", %{
            AttachStdin: true,
            AttachStdout: true,
            AttachStderr: true,
