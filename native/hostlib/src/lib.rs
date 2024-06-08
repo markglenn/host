@@ -1,15 +1,13 @@
+mod date;
 mod file;
 
 use file::FileStruct;
 use std::fs;
 
 #[rustler::nif]
-fn add(a: i64, b: i64) -> i64 {
-    a + b
-}
-
-#[rustler::nif]
 fn list_files(path: String) -> Result<Vec<FileStruct>, String> {
+    let path = if path == "" { ".".to_string() } else { path };
+
     let paths = match fs::read_dir(path) {
         Ok(paths) => paths,
         Err(_e) => return Err("Unable to read path".to_string()),
@@ -24,4 +22,4 @@ fn list_files(path: String) -> Result<Vec<FileStruct>, String> {
         .collect()
 }
 
-rustler::init!("Elixir.Host.HostLib", [add, list_files]);
+rustler::init!("Elixir.Host.HostLib", [list_files]);

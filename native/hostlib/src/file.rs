@@ -1,5 +1,7 @@
 use anyhow::Result;
 
+use crate::date::ElixirDateTime;
+
 mod file_types {
     rustler::atoms! {
         file,
@@ -13,6 +15,7 @@ pub struct FileStruct {
     name: String,
     size: u64,
     file_type: rustler::Atom,
+    modified_date: ElixirDateTime,
 }
 
 impl FileStruct {
@@ -22,6 +25,8 @@ impl FileStruct {
             Some(name) => name.to_string(),
             None => return Err(anyhow::anyhow!("Unable to convert file name to string")),
         };
+
+        let modified_date = ElixirDateTime::from(dir_entry.metadata()?.modified()?);
 
         let file_type = if metadata.is_dir() {
             file_types::directory()
@@ -33,6 +38,7 @@ impl FileStruct {
             name,
             size: metadata.len(),
             file_type,
+            modified_date,
         })
     }
 }

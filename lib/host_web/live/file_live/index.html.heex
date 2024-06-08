@@ -1,16 +1,28 @@
 <.header>
-  Listing Files
+  <span class="pr-2">
+    <.icon name="hero-folder-open" />
+  </span>
+  <span class="text-2xl">
+    <%= List.last(@path, "Files") %>
+  </span>
 </.header>
+<.table id="files" rows={@files} row_click={&JS.navigate(file_path(&1))}>
+  <:col :let={file} label="Name">
+    <span class="pr-1">
+      <.icon name={file_icon(file)} />
+    </span>
+    <span><%= file.name %></span>
+  </:col>
 
-<.table
-  id="files"
-  rows={@streams.files}
-  row_click={fn {_id, file} -> JS.navigate(~p"/files/#{file}") end}
->
-  <:col :let={{_id, file}} label="Name"><%= file.name %></:col>
-  <:action :let={{_id, file}}>
-    <div class="sr-only">
-      <.link navigate={~p"/files/#{file}"}>Show</.link>
-    </div>
-  </:action>
+  <:col :let={file} label="Kind">
+    <%= String.capitalize(to_string(file.file_type)) %>
+  </:col>
+
+  <:col :let={file} label="Size">
+    <%= Host.Files.File.storage_size(file) %>
+  </:col>
+
+  <:col :let={file} label="Date">
+    <%= inspect(file.modified_date) %>
+  </:col>
 </.table>

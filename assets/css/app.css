@@ -2,15 +2,13 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 @import "../node_modules/@xterm/xterm/css/xterm.css";
+@import "../node_modules/fontawesome-free/css/regular.css";
 
 /* This file is for your main application CSS */
 
-:root {
-  --rich-black: hsla(202, 77%, 7%, 1);
-  --white-smoke: hsla(90, 12%, 94%, 1);
-  --pomp-and-power: hsla(250, 17%, 49%, 1);
-  --persian-green: hsla(170, 31%, 48%, 1);
-  --blue-munsell: hsla(187, 73%, 39%, 1);
+@font-face {
+  font-family: "MuseoModerno";
+  src: url("/fonts/MuseoModerno-VariableFont_wght.ttf");
 }
 
 .logo {

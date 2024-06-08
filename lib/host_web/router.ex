@@ -31,11 +31,11 @@ defmodule HostWeb.Router do
     live "/vms/:id", VirtualMachineLive.Show, :show
     live "/vms/:id/show/edit", VirtualMachineLive.Show, :edit
 
-    live "/files", FileLive.Index, :index
-    live "/files/new", FileLive.Index, :new
-    live "/files/:id/edit", FileLive.Index, :edit
-    live "/files/:id", FileLive.Show, :show
-    live "/files/:id/show/edit", FileLive.Show, :edit
+    live "/files/*path", FileLive.Index, :index
+    live "/file/*path", FileLive.Show, :show
+    # live "/files/:id/edit", FileLive.Index, :edit
+    # live "/files/*path", FileLive.Show, :show
+    # live "/files/:id/show/edit", FileLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.

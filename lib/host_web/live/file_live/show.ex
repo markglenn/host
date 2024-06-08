@@ -1,4 +1,5 @@
 defmodule HostWeb.FileLive.Show do
+  alias Host.Files
   use HostWeb, :live_view
 
   @impl true
@@ -7,9 +8,10 @@ defmodule HostWeb.FileLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => _id}, _, socket) do
+  def handle_params(%{"path" => path}, _, socket) do
     {:noreply,
      socket
+     |> assign(:file, Files.get_file!(path, ""))
      |> assign(:page_title, page_title(socket.assigns.live_action))}
   end
 
