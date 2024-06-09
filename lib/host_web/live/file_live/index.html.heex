@@ -1,28 +1,37 @@
-<.header>
+<.header class="pb-2">
   <span class="pr-2">
-    <.icon name="hero-folder-open" />
+    <.path_header_icon path={@path} />
   </span>
   <span class="text-2xl">
     <%= List.last(@path, "Files") %>
   </span>
 </.header>
-<.table id="files" rows={@files} row_click={&JS.navigate(file_path(&1))}>
-  <:col :let={file} label="Name">
+
+<.table
+  id="files"
+  rows={@files}
+  row_click={&JS.navigate(file_path(&1))}
+  sort_column="Name"
+  sort_direction="ascending"
+>
+  <:col :let={listing_item} label="Name">
     <span class="pr-1">
-      <.icon name={file_icon(file)} />
+      <.icon name={file_icon(listing_item)} />
     </span>
-    <span><%= file.name %></span>
+    <span><%= listing_item.name %></span>
   </:col>
 
-  <:col :let={file} label="Kind">
-    <%= String.capitalize(to_string(file.file_type)) %>
+  <:col :let={listing_item} label="Kind">
+    <%= String.capitalize(to_string(listing_item.file_type)) %>
   </:col>
 
-  <:col :let={file} label="Size">
-    <%= Host.Files.File.storage_size(file) %>
+  <:col :let={listing_item} label="Size">
+    <.storage_size file={listing_item} />
   </:col>
 
-  <:col :let={file} label="Date">
-    <%= inspect(file.modified_date) %>
+  <:col :let={listing_item} label="Date">
+    <%= if listing_item.file_type == :file do %>
+      <.datetime datetime={listing_item.modified_date} />
+    <% end %>
   </:col>
 </.table>

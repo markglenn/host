@@ -11,7 +11,7 @@ defmodule HostWeb.FileLive.Show do
   def handle_params(%{"path" => path}, _, socket) do
     {:noreply,
      socket
-     |> assign(:file, Files.get_file!(path, ""))
+     |> assign(:file, Files.get_file!(path, "example"))
      |> assign(:page_title, page_title(socket.assigns.live_action))}
   end
 

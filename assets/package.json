@@ -7,7 +7,6 @@
   "dependencies": {
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
-    "fontawesome-free": "^1.0.4",
-    "phoenix_typed_hook": "^0.18.2"
+    "fontawesome-free": "^1.0.4"
   }
 }

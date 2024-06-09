@@ -1,6 +1,6 @@
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from "@xterm/addon-fit";
-import { Hook, makeHook } from 'phoenix_typed_hook';
+import { Hook, makeHook } from '../../vendor/phoenix_typed_hook';
 import { Channel, Socket } from 'phoenix';
 
 class TerminalHook extends Hook {

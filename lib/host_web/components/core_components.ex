@@ -457,6 +457,8 @@ defmodule HostWeb.CoreComponents do
   attr :rows, :list, required: true
   attr :row_id, :any, default: nil, doc: "the function for generating the row id"
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+  attr :sort_column, :string, default: nil, doc: "the column to sort by"
+  attr :sort_direction, :string, default: "ascending", doc: "the sort direction"
 
   attr :row_item, :any,
     default: &Function.identity/1,
@@ -485,6 +487,12 @@ defmodule HostWeb.CoreComponents do
               class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
             >
               <%= col[:label] %>
+              <%= if @sort_column == col[:label] do %>
+                <.icon
+                  name={"#{if @sort_direction == "ascending", do: "hero-chevron-down-micro", else: "hero-chevron-up-micro"}"}
+                  class="ml-1"
+                />
+              <% end %>
             </th>
             <th
               :if={@action != []}
@@ -600,6 +608,14 @@ defmodule HostWeb.CoreComponents do
   def icon(%{name: "hero-" <> _} = assigns) do
     ~H"""
     <span class={[@name, @class]} />
+    """
+  end
+
+  attr :datetime, :map, required: true
+
+  def datetime(assigns) do
+    ~H"""
+    <%= Timex.format!(@datetime, "{M}/{D}/{YYYY} {h12}:{m} {AM}") %>
     """
   end
 

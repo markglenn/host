@@ -24,9 +24,8 @@ defmodule Host.Files do
       # Map the files to include the path
       files =
         files
-        |> Enum.map(&assign_path(&1, relative_path))
+        |> Enum.map(&assign_path(&1, relative_path, relative_to))
         |> Enum.map(&assign_mime_type/1)
-        |> Enum.sort_by(&String.downcase(&1.name))
 
       {:ok, files}
     else
@@ -54,8 +53,15 @@ defmodule Host.Files do
     end
   end
 
-  defp assign_path(%File{} = file, relative_path),
-    do: Map.put(file, :path, Path.join(relative_path, file.name))
+  defp assign_path(%File{} = file, relative_path, relative_to) do
+    # Convert to a full path, then make it relative to the base path
+    path =
+      relative_path
+      |> Path.join(file.name)
+      |> Path.relative_to(relative_to)
+
+    Map.put(file, :path, path)
+  end
 
   defp assign_mime_type(%File{file_type: :directory} = file),
     do: Map.put(file, :mime_type, "text/directory")

@@ -60,7 +60,8 @@ defmodule Host.MixProject do
       {:bandit, "~> 1.2"},
       {:tesla, "~> 1.9"},
       {:hackney, "~> 1.20"},
-      {:rustler, "~> 0.33.0", runtime: false}
+      {:rustler, "~> 0.33.0", runtime: false},
+      {:timex, "~> 3.7"}
     ]
   end
 
