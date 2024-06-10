@@ -8,10 +8,8 @@ class TerminalHook extends Hook {
   channel?: Channel;
 
   mounted() {
-    const socket = window['userSocket'] as Socket;
-
     // Connect to the terminal channel
-    this.channel = socket.channel(`terminal:${this.el.dataset.type}:${this.el.dataset.topic}`, {
+    this.channel = window.userSocket.channel(`terminal:${this.el.dataset.type}:${this.el.dataset.topic}`, {
       container_id: this.el.dataset.containerId
     });
 

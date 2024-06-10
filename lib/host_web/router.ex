@@ -33,9 +33,6 @@ defmodule HostWeb.Router do
 
     live "/files/*path", FileLive.Index, :index
     live "/file/*path", FileLive.Show, :show
-    # live "/files/:id/edit", FileLive.Index, :edit
-    # live "/files/*path", FileLive.Show, :show
-    # live "/files/:id/show/edit", FileLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.
@@ -60,12 +57,11 @@ defmodule HostWeb.Router do
     end
   end
 
-  defp put_user_token(conn, _) do
-    if current_user = conn.assigns[:current_user] do
-      token = Phoenix.Token.sign(conn, "user socket", current_user.id)
+  # Place a token on the conn to authenticate the user over the user socket
+  defp put_user_token(%{assigns: assigns} = conn, _) do
+    with current_user_id <- get_in(assigns, [:current_user, :id]),
+         token <- Phoenix.Token.sign(conn, "user socket", current_user_id) do
       assign(conn, :user_token, token)
-    else
-      conn
     end
   end
 end

@@ -9,9 +9,21 @@ defmodule HostWeb.FileLive.Show do
 
   @impl true
   def handle_params(%{"path" => path}, _, socket) do
+    file =
+      Files.get_file!(path, "../winestyr")
+      |> IO.inspect()
+
+    content =
+      if file.mime_type == "text/plain" do
+        File.read!(file.path)
+      else
+        "This file is not a text file."
+      end
+
     {:noreply,
      socket
-     |> assign(:file, Files.get_file!(path, "example"))
+     |> assign(:file, file)
+     |> assign(:content, content)
      |> assign(:page_title, page_title(socket.assigns.live_action))}
   end
 

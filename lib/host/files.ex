@@ -48,7 +48,8 @@ defmodule Host.Files do
         size: stats.size,
         modified_date: modified_date,
         path: relative_path,
-        mime_type: MIME.from_path(relative_path)
+        mime_type: MIME.from_path(relative_path),
+        extension: Path.extname(relative_path) |> String.trim_leading(".")
       }
     end
   end

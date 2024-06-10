@@ -1,3 +1,5 @@
+use std::ffi::OsStr;
+
 use anyhow::Result;
 
 use crate::date::ElixirDateTime;
@@ -16,6 +18,7 @@ pub struct FileStruct {
     size: u64,
     file_type: rustler::Atom,
     modified_date: ElixirDateTime,
+    extension: String,
 }
 
 impl FileStruct {
@@ -25,6 +28,13 @@ impl FileStruct {
             Some(name) => name.to_string(),
             None => return Err(anyhow::anyhow!("Unable to convert file name to string")),
         };
+
+        let extension = match dir_entry.path().extension().and_then(OsStr::to_str) {
+            Some(extension) => extension.to_owned(),
+            None => "".to_owned(),
+        };
+
+        println!("Extension: {:?}", extension);
 
         let modified_date = ElixirDateTime::from(dir_entry.metadata()?.modified()?);
 
@@ -39,6 +49,7 @@ impl FileStruct {
             size: metadata.len(),
             file_type,
             modified_date,
+            extension,
         })
     }
 }

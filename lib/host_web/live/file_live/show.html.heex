@@ -12,4 +12,14 @@
   <:item title="Name"><%= @file.name %></:item>
 </.list>
 
+<div
+  phx-hook="EditorHook"
+  id="editor-area"
+  data-readonly="true"
+  data-lang={Host.Files.File.monaco_language(@file)}
+  class="overflow-scroll"
+>
+  <%= @content %>
+</div>
+
 <.back navigate={~p"/files"}>Back to files</.back>

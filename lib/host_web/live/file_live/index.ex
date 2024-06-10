@@ -15,8 +15,8 @@ defmodule HostWeb.FileLive.Index do
   def handle_params(%{"path" => path} = params, _url, socket) do
     {:ok, files} =
       case path do
-        [] -> Files.list_files("", "example")
-        _ -> Files.list_files(Path.join(path), "example")
+        [] -> Files.list_files("", "../winestyr")
+        _ -> Files.list_files(Path.join(path), "../winestyr")
       end
 
     socket =
