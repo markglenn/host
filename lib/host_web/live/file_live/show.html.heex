@@ -1,6 +1,5 @@
 <.header>
-  File <%= @file.name %>
-  <:subtitle>This is a file record from your database.</:subtitle>
+  <BreadcrumbsComponent.breadcrumbs path={@path} />
   <:actions>
     <.link patch={~p"/files/#{@file.name}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit file</.button>
@@ -10,16 +9,9 @@
 
 <.list>
   <:item title="Name"><%= @file.name %></:item>
+  <:item title="Size"><.storage_size file={@file} /></:item>
+  <:item title="Modified"><.datetime datetime={@file.modified_date} /></:item>
+  <:item title="Mime Type"><%= @file.mime_type %></:item>
 </.list>
 
-<div
-  phx-hook="EditorHook"
-  id="editor-area"
-  data-readonly="true"
-  data-lang={Host.Files.File.monaco_language(@file)}
-  class="overflow-scroll"
->
-  <%= @content %>
-</div>
-
-<.back navigate={~p"/files"}>Back to files</.back>
+<.live_component id={@file.name} module={PreviewComponent} file={@file} />

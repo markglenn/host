@@ -34,8 +34,6 @@ impl FileStruct {
             None => "".to_owned(),
         };
 
-        println!("Extension: {:?}", extension);
-
         let modified_date = ElixirDateTime::from(dir_entry.metadata()?.modified()?);
 
         let file_type = if metadata.is_dir() {

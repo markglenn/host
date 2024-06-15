@@ -66,11 +66,13 @@ defmodule Host.Files.File do
     "psd1" => "powershell",
     "py" => "python",
     "r" => "r",
+    "rake" => "ruby",
     "rhistory" => "r",
     "rprofile" => "r",
     "rt" => "r",
     "cshtml" => "razor",
     "rb" => "ruby",
+    "rbi" => "ruby",
     "rs" => "rust",
     "sc" => "scala",
     "scala" => "scala",
@@ -86,6 +88,19 @@ defmodule Host.Files.File do
     "yml" => "yaml",
     "yaml" => "yaml"
   }
+
+  @spec is_text(t()) :: boolean()
+  # If the mime type starts with "text/", it's text
+  def is_text(%__MODULE__{mime_type: "text/" <> _}), do: true
+
+  # Anything that maps to a language in Monaco is considered text
+  def is_text(%__MODULE__{extension: extension}) when extension != "",
+    do: Map.has_key?(@extension_to_language, extension)
+
+  # Assume everything else is binary
+  def is_text(_), do: false
+
+  def is_image(%__MODULE__{mime_type: "image/" <> _}), do: true
 
   @spec monaco_language(t()) :: String.t()
   def monaco_language(%__MODULE__{extension: extension}) when extension != "",

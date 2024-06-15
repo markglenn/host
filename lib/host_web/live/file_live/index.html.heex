@@ -1,10 +1,5 @@
 <.header class="pb-2">
-  <span class="pr-2">
-    <.path_header_icon path={@path} />
-  </span>
-  <span class="text-2xl">
-    <%= List.last(@path, "Files") %>
-  </span>
+  <BreadcrumbsComponent.breadcrumbs path={@path} />
 </.header>
 
 <.table
@@ -29,7 +24,7 @@
     <.storage_size file={listing_item} />
   </:col>
 
-  <:col :let={listing_item} label="Date">
+  <:col :let={listing_item} label="Updated">
     <%= if listing_item.file_type == :file do %>
       <.datetime datetime={listing_item.modified_date} />
     <% end %>

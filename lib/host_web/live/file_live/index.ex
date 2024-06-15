@@ -6,6 +6,8 @@ defmodule HostWeb.FileLive.Index do
 
   import HostWeb.FileLive.Components
 
+  alias HostWeb.FileLive.BreadcrumbsComponent
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -42,21 +44,8 @@ defmodule HostWeb.FileLive.Index do
   def file_icon(%File{mime_type: "image/" <> _}), do: "hero-photo"
   def file_icon(%File{mime_type: "application/" <> _}), do: "hero-document"
   def file_icon(%File{mime_type: "text/" <> _}), do: "hero-document-text"
+  def file_icon(%File{mime_type: _}), do: "hero-document-text"
 
   defp sort(files, "kind"), do: Enum.sort_by(files, &String.downcase(&1.name))
   defp sort(files, _), do: Enum.sort_by(files, &String.downcase(&1.name))
-
-  defp path_header_icon(%{path: []} = assigns) do
-    ~H"""
-    <.icon name="hero-folder-open" />
-    """
-  end
-
-  defp path_header_icon(%{path: _} = assigns) do
-    ~H"""
-    <.link navigate={parent_path(@path)} class="text-blue-500">
-      <.icon name="hero-chevron-left" />
-    </.link>
-    """
-  end
 end
