@@ -1,0 +1,12 @@
+<.header>
+  <BreadcrumbsComponent.breadcrumbs path={@path} />
+</.header>
+
+<.list>
+  <:item title="Name"><%= @file.name %></:item>
+  <:item title="Size"><.storage_size file={@file} /></:item>
+  <:item title="Modified"><.datetime datetime={@file.modified_date} /></:item>
+  <:item title="Mime Type"><%= @file.mime_type %></:item>
+</.list>
+
+<.live_component id={@file.name} module={PreviewComponent} file={@file} path={@path} />

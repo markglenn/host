@@ -457,6 +457,8 @@ defmodule HostWeb.CoreComponents do
   attr :rows, :list, required: true
   attr :row_id, :any, default: nil, doc: "the function for generating the row id"
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+  attr :sort_column, :string, default: nil, doc: "the column to sort by"
+  attr :sort_direction, :string, default: "ascending", doc: "the sort direction"
 
   attr :row_item, :any,
     default: &Function.identity/1,
@@ -475,12 +477,27 @@ defmodule HostWeb.CoreComponents do
       end
 
     ~H"""
-    <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
-      <table class="w-[40rem] mt-11 sm:w-full">
-        <thead class="text-sm text-left leading-6 text-zinc-500">
+    <div class="border rounded-lg divide-y divide-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+        <thead class="bg-gray-50 dark:bg-neutral-700">
           <tr>
-            <th :for={col <- @col} class="p-0 pb-4 pr-6 font-normal"><%= col[:label] %></th>
-            <th :if={@action != []} class="relative p-0 pb-4">
+            <th
+              :for={col <- @col}
+              scope="col"
+              class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
+            >
+              <%= col[:label] %>
+              <%= if @sort_column == col[:label] do %>
+                <.icon
+                  name={"#{if @sort_direction == "ascending", do: "hero-chevron-down-micro", else: "hero-chevron-up-micro"}"}
+                  class="ml-1"
+                />
+              <% end %>
+            </th>
+            <th
+              :if={@action != []}
+              class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
+            >
               <span class="sr-only"><%= gettext("Actions") %></span>
             </th>
           </tr>
@@ -488,31 +505,26 @@ defmodule HostWeb.CoreComponents do
         <tbody
           id={@id}
           phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
-          class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700"
+          class="divide-y divide-gray-200 dark:divide-neutral-700"
         >
           <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="group hover:bg-zinc-50">
             <td
-              :for={{col, i} <- Enum.with_index(@col)}
+              :for={{col, _i} <- Enum.with_index(@col)}
               phx-click={@row_click && @row_click.(row)}
-              class={["relative p-0", @row_click && "hover:cursor-pointer"]}
+              class={[
+                "px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-neutral-200",
+                @row_click && "hover:cursor-pointer"
+              ]}
             >
-              <div class="block py-4 pr-6">
-                <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
-                <span class={["relative", i == 0 && "font-semibold text-zinc-900"]}>
-                  <%= render_slot(col, @row_item.(row)) %>
-                </span>
-              </div>
+              <%= render_slot(col, @row_item.(row)) %>
             </td>
-            <td :if={@action != []} class="relative w-14 p-0">
-              <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
-                <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 sm:rounded-r-xl" />
-                <span
-                  :for={action <- @action}
-                  class="relative ml-4 font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
-                >
-                  <%= render_slot(action, @row_item.(row)) %>
-                </span>
-              </div>
+            <td :if={@action != []} class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
+              <span
+                :for={action <- @action}
+                class="relative ml-4 font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
+              >
+                <%= render_slot(action, @row_item.(row)) %>
+              </span>
             </td>
           </tr>
         </tbody>
@@ -596,6 +608,14 @@ defmodule HostWeb.CoreComponents do
   def icon(%{name: "hero-" <> _} = assigns) do
     ~H"""
     <span class={[@name, @class]} />
+    """
+  end
+
+  attr :datetime, :map, required: true
+
+  def datetime(assigns) do
+    ~H"""
+    <%= Timex.format!(@datetime, "{M}/{D}/{YYYY} {h12}:{m} {AM}") %>
     """
   end
 

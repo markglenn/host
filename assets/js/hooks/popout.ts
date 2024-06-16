@@ -1,4 +1,4 @@
-import { Hook, makeHook } from 'phoenix_typed_hook';
+import { Hook, makeHook } from '../../vendor/phoenix_typed_hook';
 
 class PopoutHook extends Hook {
   mounted() {

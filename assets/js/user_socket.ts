@@ -4,9 +4,11 @@
 // Bring in Phoenix channels client library:
 import { Socket } from "phoenix"
 
+let token = document.querySelector("meta[name='user-token']")?.getAttribute("content");
+
 // And connect to the path in "lib/host_web/endpoint.ex". We pass the
 // token for authentication. Read below how it should be used.
-let socket = new Socket("/socket", { params: { token: window['userToken'] } })
+let socket = new Socket("/socket", { params: { token } })
 
 // When you connect, you'll often need to authenticate the client.
 // For example, imagine you have an authentication plug, `MyAuth`,

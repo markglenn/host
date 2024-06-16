@@ -5,8 +5,9 @@
     "@types/phoenix_live_view": "^0.18.5"
   },
   "dependencies": {
+    "@monaco-editor/loader": "^1.4.0",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
-    "phoenix_typed_hook": "^0.18.2"
+    "fontawesome-free": "^1.0.4"
   }
 }

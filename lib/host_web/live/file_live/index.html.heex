@@ -1,0 +1,32 @@
+<.header class="pb-2">
+  <BreadcrumbsComponent.breadcrumbs path={@path} />
+</.header>
+
+<.table
+  id="files"
+  rows={@files}
+  row_click={&JS.navigate(file_path(&1))}
+  sort_column="Name"
+  sort_direction="ascending"
+>
+  <:col :let={listing_item} label="Name">
+    <span class="pr-1">
+      <.icon name={file_icon(listing_item)} />
+    </span>
+    <span><%= listing_item.name %></span>
+  </:col>
+
+  <:col :let={listing_item} label="Kind">
+    <%= String.capitalize(to_string(listing_item.file_type)) %>
+  </:col>
+
+  <:col :let={listing_item} label="Size">
+    <.storage_size file={listing_item} />
+  </:col>
+
+  <:col :let={listing_item} label="Updated">
+    <%= if listing_item.file_type == :file do %>
+      <.datetime datetime={listing_item.modified_date} />
+    <% end %>
+  </:col>
+</.table>

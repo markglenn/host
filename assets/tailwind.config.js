@@ -12,6 +12,7 @@ module.exports = {
     "../lib/host_web.ex",
     "../lib/host_web/**/*.*ex"
   ],
+  darkMode: 'selector',
   theme: {
     extend: {
       animation: {

@@ -21,9 +21,6 @@ defmodule HostWeb.Router do
     get "/", PageController, :home
 
     live "/containers", ContainerLive.Index, :index
-    live "/containers/new", ContainerLive.Index, :new
-    live "/containers/:id/edit", ContainerLive.Index, :edit
-
     live "/containers/:id", ContainerLive.Show, :show
     live "/containers/:id/shell", ContainerLive.Shell, :show
     live "/containers/:id/logs", ContainerLive.Logs, :show
@@ -31,9 +28,14 @@ defmodule HostWeb.Router do
     live "/vms", VirtualMachineLive.Index, :index
     live "/vms/new", VirtualMachineLive.Index, :new
     live "/vms/:id/edit", VirtualMachineLive.Index, :edit
-
     live "/vms/:id", VirtualMachineLive.Show, :show
     live "/vms/:id/show/edit", VirtualMachineLive.Show, :edit
+
+    get "/files/raw/*path", FileController, :show
+
+    live "/files", FileLive.Index, :index
+    live "/files/listing/*path", FileLive.Index, :index
+    live "/files/preview/*path", FileLive.Show, :show
   end
 
   # Other scopes may use custom stacks.
@@ -58,12 +60,11 @@ defmodule HostWeb.Router do
     end
   end
 
-  defp put_user_token(conn, _) do
-    if current_user = conn.assigns[:current_user] do
-      token = Phoenix.Token.sign(conn, "user socket", current_user.id)
+  # Place a token on the conn to authenticate the user over the user socket
+  defp put_user_token(%{assigns: assigns} = conn, _) do
+    with current_user_id <- get_in(assigns, [:current_user, :id]),
+         token <- Phoenix.Token.sign(conn, "user socket", current_user_id) do
       assign(conn, :user_token, token)
-    else
-      conn
     end
   end
 end
