@@ -1,10 +1,5 @@
 <.header>
   <BreadcrumbsComponent.breadcrumbs path={@path} />
-  <:actions>
-    <.link patch={~p"/files/#{@file.name}/show/edit"} phx-click={JS.push_focus()}>
-      <.button>Edit file</.button>
-    </.link>
-  </:actions>
 </.header>
 
 <.list>
@@ -14,4 +9,4 @@
   <:item title="Mime Type"><%= @file.mime_type %></:item>
 </.list>
 
-<.live_component id={@file.name} module={PreviewComponent} file={@file} />
+<.live_component id={@file.name} module={PreviewComponent} file={@file} path={@path} />

@@ -17,7 +17,7 @@ defmodule HostWeb.FileLive.BreadcrumbsComponent do
 
   defp breadcrumb_segments(assigns) do
     ~H"""
-    <.link navigate={~p"/files"} class="text-blue-500">
+    <.link navigate={~p"/files/listing"} class="text-blue-500">
       <.icon name="hero-home" />
     </.link>
 
@@ -35,7 +35,7 @@ defmodule HostWeb.FileLive.BreadcrumbsComponent do
   end
 
   defp get_path(path_segments, position) do
-    (["/files"] ++ Enum.take(path_segments, position))
+    (["/files", "listing"] ++ Enum.take(path_segments, position))
     |> Path.join()
   end
 end

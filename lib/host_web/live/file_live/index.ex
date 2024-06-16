@@ -14,7 +14,9 @@ defmodule HostWeb.FileLive.Index do
   end
 
   @impl true
-  def handle_params(%{"path" => path} = params, _url, socket) do
+  def handle_params(params, _url, socket) do
+    path = Map.get(params, "path", [])
+
     {:ok, files} =
       case path do
         [] -> Files.list_files("", "../winestyr")
@@ -29,16 +31,18 @@ defmodule HostWeb.FileLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :index, %{"path" => path} = _params) do
+  defp apply_action(socket, :index, params) do
+    path = Map.get(params, "path", [])
+
     socket
     |> assign(:page_title, "Listing Files: #{path}")
   end
 
-  def file_path(%File{file_type: :directory} = file), do: "/files/#{file.path}"
-  def file_path(%File{} = file), do: "/file/#{file.path}"
+  def file_path(%File{file_type: :directory} = file), do: "/files/listing/#{file.path}"
+  def file_path(%File{} = file), do: "/files/preview/#{file.path}"
 
-  def parent_path([_]), do: "/files"
-  def parent_path([_ | _] = parts), do: "/files/#{Path.join(Enum.drop(parts, -1))}"
+  def parent_path([_]), do: ~p"/files/listing"
+  def parent_path([_ | _] = parts), do: "/files/listing/#{Path.join(Enum.drop(parts, -1))}"
 
   def file_icon(%File{file_type: :directory}), do: "hero-folder"
   def file_icon(%File{mime_type: "image/" <> _}), do: "hero-photo"

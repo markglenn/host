@@ -101,6 +101,13 @@ defmodule Host.Files.File do
   def is_text(_), do: false
 
   def is_image(%__MODULE__{mime_type: "image/" <> _}), do: true
+  def is_image(_), do: false
+
+  def is_video(%__MODULE__{mime_type: "video/" <> _}), do: true
+  def is_video(_), do: false
+
+  def is_audio(%__MODULE__{mime_type: "audio/" <> _}), do: true
+  def is_audio(_), do: false
 
   @spec monaco_language(t()) :: String.t()
   def monaco_language(%__MODULE__{extension: extension}) when extension != "",
