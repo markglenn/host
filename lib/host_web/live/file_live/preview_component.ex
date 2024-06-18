@@ -56,11 +56,8 @@ defmodule HostWeb.FileLive.PreviewComponent do
 
   def image_preview(assigns) do
     ~H"""
-    <.link navigate={"/files/raw/#{Path.join(assigns.path)}"}>
-      <img
-        src={"/files/raw/#{Path.join(assigns.path)}"}
-        class="mx-auto py-5 max-h-[75vh] max-w-[75vw]"
-      />
+    <.link navigate={~p"/files/raw/#{assigns.path}"}>
+      <img src={~p"/files/raw/#{assigns.path}"} class="mx-auto py-5 max-h-[75vh] max-w-[75vw]" />
     </.link>
     """
   end
@@ -68,7 +65,7 @@ defmodule HostWeb.FileLive.PreviewComponent do
   def video_preview(assigns) do
     ~H"""
     <video controls playsinline class="mx-auto py-5 max-h-[75vh]">
-      <source src={"/files/raw/#{Path.join(assigns.path)}"} type={@file.mime_type} />
+      <source src={~p"/files/raw/#{assigns.path}"} type={@file.mime_type} />
     </video>
     """
   end
@@ -76,7 +73,7 @@ defmodule HostWeb.FileLive.PreviewComponent do
   def audio_preview(assigns) do
     ~H"""
     <audio controls class="mx-auto">
-      <source src={"/files/raw/#{Path.join(assigns.path)}"} type={@file.mime_type} />
+      <source src={~p"/files/raw/#{assigns.path}"} type={@file.mime_type} />
     </audio>
     """
   end

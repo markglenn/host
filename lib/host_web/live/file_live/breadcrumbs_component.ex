@@ -23,7 +23,7 @@ defmodule HostWeb.FileLive.BreadcrumbsComponent do
 
     <%= for {part, i} <- Enum.with_index(List.delete_at(@path, -1)) do %>
       <.icon name="hero-chevron-right" />
-      <.link navigate={get_path(@path, i + 1)} class="text-blue-500">
+      <.link navigate={~p"/files/listing/#{Enum.take(@path, i + 1)}"} class="text-blue-500">
         <%= part %>
       </.link>
     <% end %>
@@ -32,10 +32,5 @@ defmodule HostWeb.FileLive.BreadcrumbsComponent do
 
     <span><%= List.last(@path) %></span>
     """
-  end
-
-  defp get_path(path_segments, position) do
-    (["/files", "listing"] ++ Enum.take(path_segments, position))
-    |> Path.join()
   end
 end

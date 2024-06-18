@@ -38,11 +38,10 @@ defmodule HostWeb.FileLive.Index do
     |> assign(:page_title, "Listing Files: #{path}")
   end
 
-  def file_path(%File{file_type: :directory} = file), do: "/files/listing/#{file.path}"
-  def file_path(%File{} = file), do: "/files/preview/#{file.path}"
+  def file_path(%File{file_type: :directory} = file),
+    do: ~p"/files/listing/#{Path.split(file.path)}"
 
-  def parent_path([_]), do: ~p"/files/listing"
-  def parent_path([_ | _] = parts), do: "/files/listing/#{Path.join(Enum.drop(parts, -1))}"
+  def file_path(%File{} = file), do: ~p"/files/preview/#{Path.split(file.path)}"
 
   def file_icon(%File{file_type: :directory}), do: "hero-folder"
   def file_icon(%File{mime_type: "image/" <> _}), do: "hero-photo"
